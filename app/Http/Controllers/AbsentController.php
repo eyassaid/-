@@ -37,9 +37,16 @@ class AbsentController extends Controller
     public function store(Request $request,Teacher $teacher)
     {
         try{
-
+            /** 
+             * صارت عندي مشكلة حيث عند تسجيل الغياب في نفس اليوم يتم تسجيل الغياب للاسبوع القادم
+             * لذلك عملت مقارنة اذا كان اليوم مشابه لليوم الفعلي سيتم تسجيل تاريخ اليوم 
+             * ام اذا لم يشابه فسيقوم كاربون بإختيار اقرب تاريخ لذلك اليوم
+             * */ 
             $day = $request->input('day');
-            $date =Carbon::now()->next($day);
+            
+            $date = $day == Carbon::now()->dayName ? Carbon::now()->today() : Carbon::now()->next($day)  ;
+         
+
             $day = $this->days[$day];
             $schedules = $teacher->schedules()
             ->whereHas('timeTable',function($query) use($day){$query->where('days',$day);})
